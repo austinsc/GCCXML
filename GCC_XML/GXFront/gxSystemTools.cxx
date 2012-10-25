@@ -99,7 +99,9 @@ bool gxSystemTools::RunCommand(const char* command,  std::string& output,
 //----------------------------------------------------------------------------
 bool gxSystemTools::FileCopy(const char* source, const char* destination)
 {
-  return gxsys::SystemTools::CopyFileAlways(source, destination);
+  bool ret = gxsys::SystemTools::CopyFileAlways(source, destination);
+  SystemTools::SetPermissions(destination, S_IWRITE);
+  return ret;
 }
 
 //----------------------------------------------------------------------------

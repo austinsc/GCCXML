@@ -2148,7 +2148,7 @@ bool SystemTools::RemoveFile(const char* source)
 #ifdef _WIN32
   if ( !res )
     {
-    SystemTools::SetPermissions(source, mode);
+    SystemTools::SetPermissions(source, mode | S_IWRITE);
     }
 #endif
   return res;

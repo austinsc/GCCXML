@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
   gxSystemTools::RemoveADirectory((gccxmlRoot+"/Vc71").c_str());
   gxSystemTools::RemoveADirectory((gccxmlRoot+"/Vc8").c_str());
   gxSystemTools::RemoveADirectory((gccxmlRoot+"/Vc8ex").c_str());
-  gxSystemTools::RemoveADirectory((gccxmlRoot+"/Vc9").c_str());
   gxSystemTools::RemoveADirectory((gccxmlRoot+"/Vc10").c_str());
 
   // The registry keys for MSVC install detection.
@@ -102,9 +101,9 @@ int main(int argc, char* argv[])
   const char* vc9sdkRegistry =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v6.0A;InstallationFolder";
 
-  const char* vc10Registry =
-    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir";
-  const char* vc10sdkRegistry =
+ const char* vc10Registry =
+    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config\\Setup\\VS;ProductDir";
+ const char* vc10sdkRegistry =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A;InstallationFolder";
 
   // Check which versions of MSVC are installed.
@@ -457,51 +456,54 @@ int main(int argc, char* argv[])
 
 
   if(have10)
-    {
-    std::string msvc10i = msvc10 + "/Include";
-    msvc10i = gxSystemTools::CollapseDirectory(msvc10i.c_str());
-    std::string patchIname = "vc10Include.patch";
-    std::string destPathI = gccxmlRoot+"/Vc10/Include";
-    std::string msvc10sp1;
-    std::string patchI = patchDir + "/" + patchIname;
-    if(gxSystemTools::FileExists(patchI.c_str()))
-      {
-      if(!InstallSupport(patchCommand.c_str(), catCommand.c_str(),
-                         patchI.c_str(), msvc10i.c_str(), destPathI.c_str()))
-        {
-        result = 1;
-        }
-      }
-    else
-      {
-      std::cerr << "Have MSVC 10, but cannot find "
-                << patchIname << ".\n";
-      result = 1;
-      }
-    }
+  {
+	  std::string msvc10i = msvc10 + "/VC/Include";
+	  msvc10i = gxSystemTools::CollapseDirectory(msvc10i.c_str());
+	  std::string patchIname = "vc10Include.patch";
+	  std::string destPathI = gccxmlRoot+"/Vc10/Include";
+	  std::string msvc10sp1;
+	  std::string patchI = patchDir + "/" + patchIname;
+	  if(gxSystemTools::FileExists(patchI.c_str()))
+	  {
+		  if(!InstallSupport(patchCommand.c_str(), catCommand.c_str(),
+			  patchI.c_str(), msvc10i.c_str(), destPathI.c_str()))
+		  {
+			  result = 1;
+		  }
+	  }
+	  else
+	  {
+		  std::cerr << "Have MSVC 10, but cannot find "
+			  << patchIname << ".\n";
+		  result = 1;
+	  }
+  }
   if(have10sdk)
-    {
-    std::string msvc10p = msvc10sdk + "/Include";
-    msvc10p = gxSystemTools::CollapseDirectory(msvc10p.c_str());
-    std::string patchPname = "vc10PlatformSDK.patch";
-    std::string destPathP = gccxmlRoot+"/Vc10/PlatformSDK";
+  {
+	  std::string msvc10p = msvc10sdk + "/Include";
+	  msvc10p = gxSystemTools::CollapseDirectory(msvc10p.c_str());
+	  std::string patchPname = "vc10PlatformSDK.patch";
+	  std::string destPathP = gccxmlRoot+"/Vc10/PlatformSDK";
 
-    std::string patchP = patchDir + "/" + patchPname;
-    if(gxSystemTools::FileExists(patchP.c_str()))
-      {
-      if(!InstallSupport(patchCommand.c_str(), catCommand.c_str(),
-                         patchP.c_str(), msvc10p.c_str(), destPathP.c_str()))
-        {
-        result = 1;
-        }
-      }
-    else
-      {
-      std::cerr << "Have MSVC 10 Platform SDK, but "
-                << "cannot find " << patchPname << ".\n";
-      result = 1;
-      }
-    }
+	  std::string patchP = patchDir + "/" + patchPname;
+	  if(gxSystemTools::FileExists(patchP.c_str()))
+	  {
+		  if(!InstallSupport(patchCommand.c_str(), catCommand.c_str(),
+			  patchP.c_str(), msvc10p.c_str(), destPathP.c_str()))
+		  {
+			  result = 1;
+		  }
+	  }
+	  else
+	  {
+		  std::cerr << "Have MSVC 10 Platform SDK, but "
+			  << "cannot find " << patchPname << ".\n";
+		  result = 1;
+	  }
+  }
+
+
+
 
   // If we succeeded, write the timestamp file.
   if(result == 0 && (timestamp.length() > 0))
@@ -547,12 +549,6 @@ bool InstallSupport(const char* patchCommand, const char* catCommand,
       std::string dest = destPath;
       dest += "/"+line.substr(7);
       gxSystemTools::FileCopy(source.c_str(), dest.c_str());
-      mode_t mode;
-      if(gxSystemTools::GetPermissions(dest.c_str(), mode))
-        {
-        mode = mode | 0200;
-        gxSystemTools::SetPermissions(dest.c_str(), mode);
-        }
       }
     }
   std::string cmd = catCommand;

@@ -3,8 +3,8 @@
   Program:   GCC-XML
   Module:    $RCSfile: gxConfiguration.cxx,v $
   Language:  C++
-  Date:      $Date: 2012-02-10 14:05:35 $
-  Version:   $Revision: 1.74 $
+  Date:      $Date: 2010-02-10 14:29:32 $
+  Version:   $Revision: 1.71 $
 
   Copyright (c) 2002-2007 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt for details.
@@ -56,9 +56,9 @@ const char* gxConfigurationVc9sdkRegistry =
 "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v6.0A;InstallationFolder";
 
 const char* gxConfigurationVc10Registry =
-"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir";
+	"HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config\\Setup\\VS;ProductDir";
 const char* gxConfigurationVc10sdkRegistry =
-"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A;InstallationFolder";
+	"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A;InstallationFolder";
 
 //----------------------------------------------------------------------------
 gxConfiguration::gxConfiguration()
@@ -132,7 +132,7 @@ bool gxConfiguration::Configure(int argc, const char*const * argv)
       }
 #endif
     loc += "/gccxml_cc1plus";
-#if defined(_WIN32) || defined(__CYGWIN__)
+#ifdef _WIN32
     loc += ".exe";
 #endif
     if(gxSystemTools::FileExists(loc.c_str()) &&
@@ -160,7 +160,7 @@ bool gxConfiguration::Configure(int argc, const char*const * argv)
     std::string loc =
       gxSystemTools::GetFilenamePath(m_GCCXML_EXECUTABLE.c_str());
     loc += "/gccxml_cpp0";
-#if defined(_WIN32) || defined(__CYGWIN__)
+#ifdef _WIN32
     loc += ".exe";
 #endif
     if(gxSystemTools::FileExists(loc.c_str()) &&
@@ -384,7 +384,7 @@ void gxConfiguration::FindRoots(const char* argv0)
     {
     exeName = av0.substr(pos+1).c_str();
     }
-#if defined(_WIN32) || defined(__CYGWIN__)
+#ifdef _WIN32
   exeName = gxSystemTools::LowerCase(exeName.c_str());
   if(exeName.length() < 4 || exeName.substr(exeName.length()-4) != ".exe")
     {
@@ -1106,12 +1106,12 @@ bool gxConfiguration::FindFlags()
       }
     }
   else if(compilerName == "msvc10")
-    {
-    return this->FindFlagsMSVC10();
-    }
+  {
+	  return this->FindFlagsMSVC10();
+  }
   else if(compilerName == "cl")
     {
-    // We must decide if this is MSVC 6, 7, 7.1, 8, 9, or 10.
+    // We must decide if this is MSVC 6, 7, 7.1, or 8.
     std::string loc;
     bool have6 = gxSystemTools::ReadRegistryValue(gxConfigurationVc6Registry,
                                                   loc);
@@ -1125,7 +1125,7 @@ bool gxConfiguration::FindFlags()
       (gxSystemTools::ReadRegistryValue(gxConfigurationVc9Registry, loc) ||
        gxSystemTools::ReadRegistryValue(gxConfigurationVc9exRegistry, loc));
 
-    bool have10 = gxSystemTools::ReadRegistryValue(gxConfigurationVc10Registry, loc);
+	bool have10 = gxSystemTools::ReadRegistryValue(gxConfigurationVc10Registry, loc);
 
     // Look for a VS8 that is not the beta release.
     bool have8 = false;
@@ -1171,10 +1171,10 @@ bool gxConfiguration::FindFlags()
       {
       return this->FindFlagsMSVC9();
       }
-    else if(!have6 && !have7 && !have71 && !have8 && !have8ex && !have9 && have10)
-      {
-      return this->FindFlagsMSVC10();
-      }
+	else if(!have6 && !have7 && !have71 && !have8 && !have8ex && !have9 && have10)
+	{
+		return this->FindFlagsMSVC10();
+	}
     else if(have6 || have7 || have71 || have8 || have8ex || have9 || have10)
       {
       // Find available support directories.
@@ -1184,7 +1184,7 @@ bool gxConfiguration::FindFlags()
       bool support8 = have8 && this->FindData("Vc8");
       bool support8ex = have8ex && this->FindData("Vc8ex");
       bool support9 = have9 && this->FindData("Vc9");
-      bool support10 = have10 && this->FindData("Vc10");
+	  bool support10 = have10 && this->FindData("Vc10");
 
       // Have more than one.  See if only one has the support
       // directory available.
@@ -1218,11 +1218,11 @@ bool gxConfiguration::FindFlags()
         {
         return this->FindFlagsMSVC9();
         }
-      else if(!support6 && !support7 && !support71 && !support8 &&
-              !support8ex && !support9 && support10)
-        {
-        return this->FindFlagsMSVC10();
-        }
+	  else if(!support6 && !support7 && !support71 && !support8 &&
+		  !support8ex && !support9 && support10)
+	  {
+		  return this->FindFlagsMSVC10();
+	  }
       else if(!support6 && !support7 && !support71 && !support8 &&
               !support8ex && !support9 && !support10)
         {
@@ -1293,10 +1293,10 @@ bool gxConfiguration::FindFlags()
             {
             return this->FindFlagsMSVC9();
             }
-          else if(output.find("Compiler Version 16.") != std::string::npos)
-            {
-            return this->FindFlagsMSVC10();
-            }
+		  else if(output.find("Compiler Version 16.") != std::string::npos)
+		  {
+			  return this->FindFlagsMSVC10();
+		  }
           }
         // Couldn't tell by running the compiler.
         }
@@ -1304,9 +1304,9 @@ bool gxConfiguration::FindFlags()
       // was used to build this executable.
       const char* const clText =
         "Compiler \"cl\" specified, but more than one of "
-        "MSVC 6, 7, 7.1, 8, 9, and 10 are installed.\n"
+        "MSVC 6, 7, 7.1, 8, and 9 are installed.\n"
         "Please specify \"msvc6\", \"msvc7\", \"msvc71\", \"msvc8\", "
-        "\"msvc8ex\", \"msvc9\", or \"msvc10\" for "
+        "\"msvc8ex\", or \"msvc9\" for "
         "the GCCXML_COMPILER setting.\n";
 #if defined(_MSC_VER) && ((_MSC_VER >= 1200) && (_MSC_VER < 1300))
       std::cerr << "Warning:\n" << clText
@@ -1576,7 +1576,6 @@ bool gxConfiguration::FindFlagsGCC()
               {
               s = *it;
               }
-            gxSystemTools::ConvertToUnixSlashes(s);
 
             if (INCLUDES != "")
               {
@@ -1802,7 +1801,6 @@ bool gxConfiguration::FindFlagsIntel()
               {
               s = *it;
               }
-            gxSystemTools::ConvertToUnixSlashes(s);
 
             if (INCLUDES != "")
               {
@@ -2029,7 +2027,6 @@ bool gxConfiguration::FindFlagsMIPSpro()
               {
               s = *it;
               }
-            gxSystemTools::ConvertToUnixSlashes(s);
 
             if (INCLUDES != "")
               {
@@ -2484,21 +2481,21 @@ bool gxConfiguration::FindFlagsMSVC9()
 //----------------------------------------------------------------------------
 bool gxConfiguration::FindFlagsMSVC10()
 {
-  // The registry key to use when attempting to automatically find the
-  // MSVC include files.
-  std::string msvcPath;
-  if(!gxSystemTools::ReadRegistryValue(gxConfigurationVc10Registry, msvcPath))
-    {
-    std::cerr << "Error finding MSVC 10 from registry.\n";
-    return false;
-    }
-  std::string psdkPath;
-  if(!gxSystemTools::ReadRegistryValue(gxConfigurationVc10sdkRegistry, psdkPath))
-    {
-    std::cerr << "Error finding MSVC 10 Platform SDK from registry.\n";
-    return false;
-    }
-  std::string msvcPath1 = msvcPath+"/Include";
+	// The registry key to use when attempting to automatically find the
+	// MSVC include files.
+	std::string msvcPath;
+	if(!gxSystemTools::ReadRegistryValue(gxConfigurationVc10Registry, msvcPath))
+	{
+		std::cerr << "Error finding MSVC 10 from registry.\n";
+		return false;
+	}
+	std::string psdkPath;
+	if(!gxSystemTools::ReadRegistryValue(gxConfigurationVc10sdkRegistry, psdkPath))
+	{
+		std::cerr << "Error finding MSVC 10 Platform SDK from registry.\n";
+		return false;
+	}
+  std::string msvcPath1 = msvcPath+"/VC/Include";
   std::string msvcPath2 = psdkPath+"/Include";
   msvcPath1 = gxSystemTools::CollapseDirectory(msvcPath1.c_str());
   msvcPath2 = gxSystemTools::CollapseDirectory(msvcPath2.c_str());
@@ -2526,7 +2523,6 @@ bool gxConfiguration::FindFlagsMSVC10()
     "-D_M_IX86 "
     "-D_WCHAR_T_DEFINED -DPASCAL= -DRPC_ENTRY= -DSHSTDAPI=HRESULT "
     "-D_INTEGRAL_MAX_BITS=64 "
-    "-D_HAS_CPP0X=0 "
     "-D__uuidof(x)=IID() -DSHSTDAPI_(x)=x "
     "-D__w64= "
     "-D__int8=char "

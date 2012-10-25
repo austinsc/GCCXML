@@ -3,8 +3,8 @@
   Program:   GCC-XML
   Module:    $RCSfile: gxConfiguration.h,v $
   Language:  C++
-  Date:      $Date: 2010-11-18 19:45:59 $
-  Version:   $Revision: 1.19 $
+  Date:      $Date: 2008-04-21 15:47:50 $
+  Version:   $Revision: 1.18 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt for details.
