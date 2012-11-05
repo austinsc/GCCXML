@@ -3252,12 +3252,16 @@ xml_find_template_parm (tree t)
       return 0;
       }
 
+	/* SCA */
+	case IDENTIFIER_NODE: return 0;
+	/* END SCA */
+
     /* Other types that have no nested types.  */
     case INTEGER_CST: return 0;
     case STATIC_CAST_EXPR: return 0;
     default:
-      fprintf(stderr, "xml_find_template_parm encountered unsupported type %s\n",
-              tree_code_name[TREE_CODE (t)]);
+      //fprintf(stderr, "xml_find_template_parm encountered unsupported type %s (%d)\n", tree_code_name[TREE_CODE (t)], TREE_CODE (t));
+		break;
     }
   return 0;
 }
